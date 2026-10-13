@@ -1,0 +1,197 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AHP Decision Studio</title><style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172234;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.app{max-width:1130px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}h1{font-size:27px;margin:0}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px}p{line-height:1.5;color:#526074}.muted,small{color:#607086}.pill{font-size:12px;background:#e5eefb;color:#2057a4;padding:5px 9px;border-radius:30px}.card{border:1px solid #dce3ee;background:#fff;border-radius:15px;padding:20px;margin:12px 0;box-shadow:0 3px 12px #17223408}.toolbar,.row,.buttons{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row{margin:8px 0}.grow{flex:1;min-width:135px}.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.steps button{flex:1;min-width:95px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}input,select,button{font:inherit;border:1px solid #cbd6e5;border-radius:8px;padding:9px 11px;background:#fff;color:#172234}input[type=number]{width:105px}input[type=text]{max-width:100%}button{cursor:pointer}button:hover{border-color:#3665b6}button.primary,.steps button.selected{background:#2057a4;color:#fff;border-color:#2057a4}button.danger{color:#a33338}button:disabled{opacity:.5;cursor:not-allowed}label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#506078}.alert{background:#fff0ed;color:#953b30;padding:12px;border-radius:9px;margin:12px 0}.good{color:#23764a}.warning{color:#ae5d19}.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border-bottom:1px solid #e6ebf3;text-align:left}th{color:#4f5e73;background:#f6f8fc}td input{width:95px!important}.rank{font-weight:700}.bar{height:13px;border-radius:4px;background:#2370aa;min-width:2px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}#chart{width:100%;height:auto;max-height:400px}.spacer{flex:1}.inline{display:inline-flex;align-items:center;gap:7px}.footer{margin-top:32px;font-size:12px;color:#69788b}.tag{background:#edf3f9;border-radius:5px;padding:3px 6px;font-size:11px}@media(max-width:720px){.app{padding:12px}.result-grid{grid-template-columns:1fr}.card{padding:14px}.steps button{font-size:12px;padding:8px 4px}h1{font-size:22px}}
+</style></head><body><main class="app"><header><div><h1>AHP Decision Studio</h1><p style="margin:6px 0">Free decision analysis · classical AHP and direct weighting</p></div><div class="toolbar"><span class="pill" id="saveStatus">Local autosave</span><button id="exportProject">Save project ↓</button><button id="importProject">Open project ↑</button><input id="fileInput" type="file" accept=".json,application/json" hidden></div></header><nav class="steps" id="steps"></nav><div id="view"></div><footer class="footer">Private by default: calculations and autosave run in your browser. Local storage may be cleared; export a project file to back up your work. AHP distributive synthesis can exhibit rank reversal. These are decision-support calculations, not guarantees of outcomes.</footer></main><script>/** AHP calculation engine v0.1.0. No DOM, dependencies, persistence or network calls. */
+const RI_SAATY = Object.freeze([0, 0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49]);
+const EPS = 1e-12;
+function fail(message) { throw new Error(message); }
+function finite(v, label) { if (typeof v !== 'number' || !Number.isFinite(v)) fail(`${label} must be a finite number`); return v; }
+function normalize(v) { const s = v.reduce((a,b)=>a+b,0); if (!(s>0)) fail('Weights must have positive sum'); return v.map(x=>x/s); }
+function manualWeights(values, {percent=false}={}) {
+  if (!Array.isArray(values) || !values.length) fail('Enter at least one weight');
+  const w = values.map((v,i)=>finite(v,`Weight ${i+1}`));
+  if (w.some(x=>x<0)) fail('Manual weights cannot be negative');
+  const sum = w.reduce((a,b)=>a+b,0);
+  if (!(sum>0)) fail('At least one weight must be positive');
+  // Percent mode is a validation contract; it does not silently rescale an invalid sum.
+  if (percent && Math.abs(sum-100)>1e-8) fail(`Percentage weights must sum to 100 (got ${sum})`);
+  return normalize(w);
+}
+function pairwiseMatrix(n, comparisons) {
+  if (!Number.isInteger(n) || n<1 || n>10) fail('Pairwise matrix size must be 1 to 10 (published RI table support)');
+  const a = Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:null));
+  for (const entry of comparisons) {
+    if (!Array.isArray(entry) || entry.length!==3) fail('Comparison must be [row, column, value]');
+    const [i,j,v] = entry;
+    if (!Number.isInteger(i)||!Number.isInteger(j)||i<0||j<0||i>=n||j>=n||i===j) fail('Comparison indices invalid');
+    finite(v,'Comparison');
+    if (v<1/9- EPS || v>9+EPS || v<=0) fail('Comparisons must be between 1/9 and 9');
+    if (a[i][j]!==null && Math.abs(a[i][j]-v)>1e-10) fail(`Conflicting duplicate comparison ${i},${j}`);
+    a[i][j]=v;a[j][i]=1/v;
+  }
+  return a;
+}
+function calculatePairwise(matrix,{tolerance=1e-13,maxIterations=100000}={}) {
+  if (!Array.isArray(matrix)||!matrix.length) fail('Matrix cannot be empty');
+  const n=matrix.length;
+  if(n>10) fail('Pairwise matrix exceeds supported RI table (10)');
+  for(let i=0;i<n;i++) {
+    if(!Array.isArray(matrix[i])||matrix[i].length!==n) fail('Matrix must be square');
+    for(let j=0;j<n;j++) {
+      const a=matrix[i][j];
+      if(a===null || a===undefined) fail(`Missing comparison between ${i+1} and ${j+1}`);
+      finite(a,`Matrix[${i}][${j}]`);
+      if(a<=0) fail('Pairwise values must be positive');
+      if(i===j && Math.abs(a-1)>1e-10) fail('Matrix diagonal must be 1');
+      if(Math.abs(a*matrix[j][i]-1)>1e-9) fail('Matrix must be reciprocal');
+    }
+  }
+  let w=Array(n).fill(1/n),iterations=0,converged=false;
+  for(;iterations<maxIterations;iterations++) {
+    const next=normalize(matrix.map(row=>row.reduce((s,a,j)=>s+a*w[j],0)));
+    const difference=Math.max(...next.map((v,i)=>Math.abs(v-w[i])));
+    w=next;
+    if(difference<tolerance){converged=true;iterations++;break;}
+  }
+  if(!converged) fail('Eigenvector iteration did not converge');
+  const aw=matrix.map(row=>row.reduce((s,a,j)=>s+a*w[j],0));
+  const lambda=aw.reduce((s,v,i)=>s+v/w[i],0)/n;
+  const residual=Math.max(...aw.map((v,i)=>Math.abs(v-lambda*w[i])));
+  if(residual>1e-8) fail('Eigenvector residual exceeds acceptable tolerance');
+  const ci=n<=2?0:Math.max(0,(lambda-n)/(n-1));
+  const cr=n<=2?0:ci/RI_SAATY[n];
+  return {weights:w,lambdaMax:lambda,consistencyIndex:ci,consistencyRatio:cr,consistent:cr<=0.1+1e-12,iterations,residual,ri:RI_SAATY[n],method:'principal-eigenvector'};
+}
+function calculateComparisons(n,entries) { return calculatePairwise(pairwiseMatrix(n,entries)); }
+/** Tree: {id, weight?:number, children?:[]}. Weight is local to its parent; roots are an array. */
+function hierarchyGlobalWeights(roots) {
+  if(!Array.isArray(roots)||!roots.length) fail('Hierarchy requires root criteria');
+  const leaf=[];const seen=new Set();
+  function visit(children,parentWeight,path) {
+    const weights=manualWeights(children.map(c=>c.weight));
+    children.forEach((node,i)=>{
+      if(!node || typeof node.id!=='string'||!node.id.trim()||seen.has(node.id)) fail('Hierarchy IDs must be unique, non-empty strings');
+      seen.add(node.id);
+      const global=parentWeight*weights[i];
+      if(node.children!==undefined && (!Array.isArray(node.children)||!node.children.length)) fail('Children must be nonempty');
+      if(node.children) visit(node.children,global,[...path,node.id]);
+      else leaf.push({id:node.id,globalWeight:global,path:[...path,node.id]});
+    });
+  }
+  visit(roots,1,[]);
+  return leaf;
+}
+/** Distributive AHP synthesis. Each criterion column is a probability distribution over alternatives. */
+function synthesize(alternativeIds, criteriaWeights, prioritiesByCriterion) {
+  if(!Array.isArray(alternativeIds)||!alternativeIds.length || new Set(alternativeIds).size!==alternativeIds.length) fail('Unique alternatives required');
+  const weights=manualWeights(criteriaWeights);
+  if(!Array.isArray(prioritiesByCriterion)||prioritiesByCriterion.length!==weights.length) fail('Priority columns must match criteria');
+  const columns=prioritiesByCriterion.map((c,i)=>{
+    if(!Array.isArray(c)||c.length!==alternativeIds.length) fail(`Criterion ${i+1} has incorrect alternative count`);
+    const scores=c.map((v,j)=>finite(v,`Priority ${i+1},${j+1}`));
+    if(scores.some(v=>v<0)) fail('Priorities cannot be negative');
+    const sum=scores.reduce((a,b)=>a+b,0);
+    if(Math.abs(sum-1)>1e-8) fail(`Criterion ${i+1} priorities must sum to 1`);
+    return scores;
+  });
+  const results=alternativeIds.map((id,j)=>({id,score:weights.reduce((s,w,i)=>s+w*columns[i][j],0)}));
+  results.sort((a,b)=>b.score-a.score || String(a.id).localeCompare(String(b.id)));
+  return results.map((r,i)=>({...r,rank:i+1}));
+}
+/** Optional objective data conversion, NOT classical AHP pairwise priorities. Explicit fixed anchors. */
+function linearUtility(value,{worst,best,direction='maximize'}={}) {
+  finite(value,'Value');finite(worst,'Worst anchor');finite(best,'Best anchor');
+  if(direction!=='minimize' && direction!=='maximize') fail('Direction must be minimize or maximize');
+  if(worst===best) fail('Best and worst anchors must differ');
+  if(direction==='maximize' && !(best>worst)) fail('For maximize, best must exceed worst');
+  if(direction==='minimize' && !(best<worst)) fail('For minimize, best must be smaller than worst');
+  return Math.max(0,Math.min(1,(value-worst)/(best-worst)));
+}
+/** Points are {id,objectives:{key:finiteNumber}}; directions maps key to minimize/maximize. */
+function paretoFront(points,directions,{epsilon=1e-10}={}) {
+  if(!Array.isArray(points)||!points.length) fail('Points required');
+  if(!directions||!Object.keys(directions).length) fail('At least one objective required');
+  if(!Number.isFinite(epsilon)||epsilon<0) fail('Invalid epsilon');
+  const keys=Object.keys(directions);
+  const ids=new Set();
+  for(const p of points){
+    if(ids.has(p.id)) fail('Point IDs must be unique'); ids.add(p.id);
+    keys.forEach(k=>{if(!['minimize','maximize'].includes(directions[k])) fail('Objective direction invalid');finite(p.objectives?.[k],`Objective ${k}`);});
+  }
+  function dominates(a,b){
+    let strictlyBetter=false;
+    for(const k of keys){
+      const sign=directions[k]==='maximize'?1:-1;
+      const delta=sign*(a.objectives[k]-b.objectives[k]);
+      if(delta< -epsilon)return false;
+      if(delta>epsilon)strictlyBetter=true;
+    }
+    return strictlyBetter;
+  }
+  return points.map(p=>({...p,efficient:!points.some(other=>other!==p&&dominates(other,p)),dominatedBy:points.filter(other=>other!==p&&dominates(other,p)).map(o=>o.id)}));
+}
+
+/** Validate untrusted JSON before loading it into the interface. */
+function validateProject(p) {
+  const fail=m=>{throw new Error(`Invalid project: ${m}`)};
+  const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+  if(!object(p)||p.version!==1)fail('unsupported version');
+  if(typeof p.title!=='string'||p.title.length>300)fail('title');
+  const collection=(list,label,min,max)=>{
+    if(!Array.isArray(list)||list.length<min||list.length>max)fail(label+' count');
+    const ids=new Set();
+    for(const x of list){if(!object(x)||typeof x.id!=='string'||!x.id||x.id.length>80||x.id.includes('|')||['__proto__','constructor','prototype'].includes(x.id)||ids.has(x.id)||typeof x.name!=='string'||x.name.length>200)fail(label+' items');ids.add(x.id)}
+    return ids;
+  };
+  const criteria=collection(p.criteria,'criteria',1,10),alts=collection(p.alternatives,'alternatives',1,10),objectives=collection(p.objectives,'objectives',1,8);
+  if(!['manual','pairwise'].includes(p.weightMethod)||!['scores','pairwise'].includes(p.evaluationMethod))fail('method');
+  const finite=x=>typeof x==='number'&&Number.isFinite(x);
+  for(const c of p.criteria)if(!(c.weight===null||finite(c.weight))||(finite(c.weight)&&c.weight<0))fail('criterion weight');
+  const record=(x,label)=>{if(!object(x))fail(label);return x};
+  const judgements=(x,ids,label)=>{record(x,label);for(const [key,v] of Object.entries(x)){const pair=key.split('|');if(pair.length!==2||!ids.has(pair[0])||!ids.has(pair[1])||pair[0]===pair[1]||!finite(v)||v<1/9-1e-12||v>9+1e-12)fail(label+' values')}};
+  judgements(p.criteriaComparisons,criteria,'criterion comparisons');
+  record(p.altComparisons,'alternative comparisons');for(const [cid,vals] of Object.entries(p.altComparisons)){if(!criteria.has(cid))fail('unknown criterion');judgements(vals,alts,'alternative comparisons')}
+  record(p.scores,'scores');for(const [cid,vals] of Object.entries(p.scores)){if(!criteria.has(cid))fail('unknown score criterion');record(vals,'score values');for(const [aid,v] of Object.entries(vals))if(!alts.has(aid)||!(v===null||finite(v))||(finite(v)&&v<0))fail('scores')}
+  for(const o of p.objectives){if(!['minimize','maximize'].includes(o.direction))fail('objective direction');record(o.values,'objective values');for(const [aid,v] of Object.entries(o.values))if(!alts.has(aid)||!(v===''||finite(v)))fail('objective values')}
+  if(p.weightAdjustment!==null){if(!Array.isArray(p.weightAdjustment)||p.weightAdjustment.length!==p.criteria.length||p.weightAdjustment.some(x=>!finite(x)||x<0)||Math.abs(p.weightAdjustment.reduce((a,b)=>a+b,0)-1)>1e-8)fail('sensitivity weights')}
+  return p;
+}
+
+
+
+
+const KEY='ahp-decision-studio-v1';const names=['Setup','Criteria weights','Evaluate options','Results & frontier'];let step=0;
+const newProject=()=>({version:1,title:'Selecting a service provider',criteria:[{id:'c1',name:'Cost',weight:40},{id:'c2',name:'Service quality',weight:35},{id:'c3',name:'Sustainability',weight:25}],alternatives:[{id:'a1',name:'Provider A'},{id:'a2',name:'Provider B'},{id:'a3',name:'Provider C'}],weightMethod:'manual',criteriaComparisons:{},evaluationMethod:'scores',scores:{c1:{a1:8,a2:6,a3:9},c2:{a1:7,a2:9,a3:5},c3:{a1:6,a2:8,a3:7}},altComparisons:{},objectives:[{id:'o1',name:'Annual cost (S$ thousand)',direction:'minimize',values:{a1:90,a2:110,a3:80}},{id:'o2',name:'Technical quality',direction:'maximize',values:{a1:75,a2:90,a3:65}}],weightAdjustment:null});
+let p;try{const raw=localStorage.getItem(KEY);p=raw?JSON.parse(raw):newProject();validateProject(p);}catch{p=newProject();}
+const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const uid=()=>Math.random().toString(36).slice(2,11);const fmt=v=>Number(v).toFixed(3);const sum=a=>a.reduce((x,y)=>x+y,0);
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(p));$('saveStatus').textContent='Saved locally ✓';}catch{$('saveStatus').textContent='Autosave unavailable — export your file';}}
+function update(fn){fn();persist();render();}
+function options(items,current){return items.map(x=>`<option value="${esc(x.id)}" ${x.id===current?'selected':''}>${esc(x.name)}</option>`).join('');}
+function pairKey(a,b){return `${a}|${b}`;}
+function comparisonRows(items,data,handler){let html='<div class="table-scroll"><table><thead><tr><th>Compared with</th><th>Preference</th><th>Judgment</th></tr></thead><tbody>';for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){const a=items[i],b=items[j],k=pairKey(a.id,b.id),v=data[k]??1;html+=`<tr><td>${esc(a.name)} vs ${esc(b.name)}</td><td><select data-${handler}="${esc(k)}">${[9,8,7,6,5,4,3,2,1,1/2,1/3,1/4,1/5,1/6,1/7,1/8,1/9].map(x=>`<option value="${x}" ${Math.abs(x-v)<1e-9?'selected':''}>${x>=1?`${x}: ${esc(a.name)} preferred`:`1/${Math.round(1/x)}: ${esc(b.name)} preferred`}${x===1?' (equal)':''}</option>`).join('')}</select></td><td><span class="tag">${v===1?'Equal':v>1?`${v} : 1`:`1 : ${Math.round(1/v)}`}</span></td></tr>`;}
+return html+'</tbody></table></div>';}
+function entries(items,data){const e=[];for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){const v=data[pairKey(items[i].id,items[j].id)];if(v===undefined)throw Error(`Complete all pairwise judgments (${items[i].name} versus ${items[j].name})`);e.push([i,j,v]);}return e;}
+function getWeights(){return p.weightMethod==='manual'?manualWeights(p.criteria.map(c=>c.weight),{percent:true}):calculateComparisons(p.criteria.length,entries(p.criteria,p.criteriaComparisons)).weights;}
+function getResults(){const w=p.weightAdjustment??getWeights();const columns=p.criteria.map(c=>{if(p.evaluationMethod==='scores'){const v=p.alternatives.map(a=>p.scores[c.id]?.[a.id]);if(v.some(x=>typeof x!=='number'||!Number.isFinite(x)||x<0))throw Error(`Missing/invalid score under ${c.name}`);return manualWeights(v);}return calculateComparisons(p.alternatives.length,entries(p.alternatives,p.altComparisons[c.id]??{})).weights;});return {weights:w,columns,ranked:synthesize(p.alternatives.map(a=>a.id),w,columns)};}
+function baseView(){return `<section class="card"><label>Decision/project title<input id="title" type="text" value="${esc(p.title)}"></label><div class="grid"><div><h2>Criteria <span class="tag">${p.criteria.length} / 10</span></h2><div id="criteriaFields">${p.criteria.map((c,i)=>`<div class="row"><input class="grow" data-criterion="${esc(c.id)}" aria-label="Criterion ${i+1}" value="${esc(c.name)}"><button class="danger" data-delete-criterion="${esc(c.id)}" ${p.criteria.length<=1?'disabled':''}>×</button></div>`).join('')}</div><button id="addCriterion" ${p.criteria.length>=10?'disabled':''}>+ Add criterion</button></div><div><h2>Alternatives <span class="tag">${p.alternatives.length} / 10</span></h2>${p.alternatives.map((a,i)=>`<div class="row"><input class="grow" data-alternative="${esc(a.id)}" aria-label="Alternative ${i+1}" value="${esc(a.name)}"><button class="danger" data-delete-alternative="${esc(a.id)}" ${p.alternatives.length<=1?'disabled':''}>×</button></div>`).join('')}<button id="addAlternative" ${p.alternatives.length>=10?'disabled':''}>+ Add alternative</button></div></div><p>Up to 10 criteria and 10 alternatives in this release. Use concise, distinct names.</p></section>`;}
+function weightsView(){const isAHP=p.weightMethod==='pairwise';let out=`<section class="card"><h2>Choose weighting method</h2><div class="row"><label class="inline"><input type="radio" name="wm" value="manual" ${!isAHP?'checked':''}> Direct percentages</label><label class="inline"><input type="radio" name="wm" value="pairwise" ${isAHP?'checked':''}> AHP pairwise comparisons</label></div><p>Manual percentages must sum to exactly 100. AHP derives weights using the principal eigenvector and displays a consistency ratio.</p>`;
+if(isAHP){out+=comparisonRows(p.criteria,p.criteriaComparisons,'criterion-pair');try{const r=calculateComparisons(p.criteria.length,entries(p.criteria,p.criteriaComparisons));out+=`<p class="${r.consistent?'good':'warning'}">CR: ${fmt(r.consistencyRatio)} · ${r.consistent?'Within 0.10 guideline':'Review inconsistent judgments'}</p>`;}catch(e){out+=`<p class="warning">${esc(e.message)}</p>`;}}else{out+=`<div class="grid">${p.criteria.map(c=>`<label>${esc(c.name)} (%)<input type="number" min="0" max="100" step="any" data-weight="${esc(c.id)}" value="${esc(c.weight)}"></label>`).join('')}</div><p>Total: ${fmt(sum(p.criteria.map(c=>c.weight)))}%</p>`;}return out+'</section>';}
+function evaluationView(){let out=`<section class="card"><h2>Evaluate each alternative</h2><div class="row"><label class="inline"><input type="radio" name="em" value="scores" ${p.evaluationMethod==='scores'?'checked':''}> Direct scores</label><label class="inline"><input type="radio" name="em" value="pairwise" ${p.evaluationMethod==='pairwise'?'checked':''}> Pairwise comparisons</label></div><p>For direct scores, enter nonnegative values where higher means better. Scores are normalized within each criterion, so raw costs should not be entered here without a documented utility transformation. Pairwise mode uses the AHP 1–9 scale.</p>`;
+if(p.evaluationMethod==='scores'){out+='<div class="table-scroll"><table><thead><tr><th>Alternative</th>'+p.criteria.map(c=>`<th>${esc(c.name)}</th>`).join('')+'</tr></thead><tbody>'+p.alternatives.map(a=>`<tr><th>${esc(a.name)}</th>${p.criteria.map(c=>`<td><input type="number" min="0" step="any" data-score="${esc(c.id)}|${esc(a.id)}" value="${esc(p.scores[c.id]?.[a.id]??0)}"></td>`).join('')}</tr>`).join('')+'</tbody></table></div>';}else{out+=p.criteria.map(c=>`<h3>${esc(c.name)}</h3>${comparisonRows(p.alternatives,p.altComparisons[c.id]??{},'alt-pair-'+c.id)}${(()=>{try{const r=calculateComparisons(p.alternatives.length,entries(p.alternatives,p.altComparisons[c.id]??{}));return `<p class="${r.consistent?'good':'warning'}">CR ${fmt(r.consistencyRatio)}</p>`;}catch{return '<p class="warning">Comparisons incomplete</p>';}})()}`).join('');}return out+'</section>';}
+function resultsView(){let out='<section class="card"><h2>Decision rankings</h2>';let results;try{results=getResults();const namesMap=Object.fromEntries(p.alternatives.map(a=>[a.id,a.name]));out+=`<div class="table-scroll"><table><thead><tr><th>Rank</th><th>Alternative</th><th>Priority</th><th>Visual</th></tr></thead><tbody>${results.ranked.map(r=>`<tr><td class="rank">${r.rank}</td><td>${esc(namesMap[r.id])}</td><td>${(100*r.score).toFixed(2)}%</td><td style="width:35%"><div class="bar" style="width:${100*r.score/Math.max(...results.ranked.map(x=>x.score))}%"></div></td></tr>`).join('')}</tbody></table></div><h3>Criterion weights & sensitivity</h3><p>Adjust a weight to explore rankings. Other weights are redistributed proportionally. "Reset" returns to the specified weights.</p>${p.criteria.map((c,i)=>`<div class="row"><label class="grow">${esc(c.name)} <strong>${(100*results.weights[i]).toFixed(1)}%</strong><input style="width:100%" type="range" min="0" max="100" step="1" value="${100*results.weights[i]}" data-sens="${i}"></label></div>`).join('')}<button id="resetSensitivity">Reset weights</button>`;}catch(e){out+=`<div class="alert">Complete the prior steps first: ${esc(e.message)}</div>`;}out+='</section>';
+ out+=`<section class="card"><h2>Trade-offs & Pareto-efficient alternatives</h2><p>Add real, measurable objectives separately from AHP priorities. Smaller costs and larger benefits are interpreted using their selected directions. A non-dominated alternative is not necessarily the highest AHP-ranked option.</p><div class="buttons"><button id="addObjective" ${p.objectives.length>=8?'disabled':''}>+ Add objective</button></div>${p.objectives.map(o=>`<div class="card"><div class="row"><label class="grow">Objective name<input data-objective-name="${esc(o.id)}" type="text" value="${esc(o.name)}"></label><label>Direction<select data-direction="${esc(o.id)}"><option value="minimize" ${o.direction==='minimize'?'selected':''}>Lower is better</option><option value="maximize" ${o.direction==='maximize'?'selected':''}>Higher is better</option></select></label><button data-delete-objective="${esc(o.id)}" class="danger" ${p.objectives.length<=1?'disabled':''}>Delete</button></div><div class="grid">${p.alternatives.map(a=>`<label>${esc(a.name)}<input type="number" step="any" data-objective-value="${esc(o.id)}|${esc(a.id)}" value="${esc(o.values[a.id]??'')}"></label>`).join('')}</div></div>`).join('')}`;
+if(p.objectives.length>=2){out+=`<div class="row"><label>Horizontal axis<select id="xAxis">${options(p.objectives,p.objectives[0].id)}</select></label><label>Vertical axis<select id="yAxis">${options(p.objectives,p.objectives[1].id)}</select></label></div>`;}out+='<div id="frontier"></div></section>';return out;}
+function renderFrontier(){const target=$('frontier');if(!target)return;try{const directions=Object.fromEntries(p.objectives.map(o=>[o.id,o.direction]));const pts=p.alternatives.map(a=>({id:a.id,objectives:Object.fromEntries(p.objectives.map(o=>[o.id,o.values[a.id]]))}));for(const a of p.alternatives)for(const o of p.objectives)if(typeof o.values[a.id]!=='number'||!Number.isFinite(o.values[a.id]))throw Error(`Enter ${o.name} for ${a.name}`);
+const ranked=paretoFront(pts,directions);const efficient=ranked.filter(r=>r.efficient).length;let html=`<p><strong>${efficient} of ${ranked.length}</strong> alternatives are nondominated across all ${p.objectives.length} objective(s).</p><p>${ranked.map(r=>`${esc(p.alternatives.find(a=>a.id===r.id).name)}: <strong class="${r.efficient?'good':'warning'}">${r.efficient?'Efficient':'Dominated'}</strong>`).join(' · ')}</p>`;
+if(p.objectives.length>=2){const x=p.objectives.find(o=>o.id===$('xAxis').value)??p.objectives[0],y=p.objectives.find(o=>o.id===$('yAxis').value)??p.objectives[1];const xv=pts.map(z=>z.objectives[x.id]),yv=pts.map(z=>z.objectives[y.id]);let xmin=Math.min(...xv),xmax=Math.max(...xv),ymin=Math.min(...yv),ymax=Math.max(...yv);const dx=xmax-xmin||1,dy=ymax-ymin||1;const coord=(v,min,d)=> (v-min)/d;html+=`<svg id="chart" viewBox="0 0 670 370" role="img" aria-label="Scatterplot of ${esc(x.name)} and ${esc(y.name)}"><rect x="65" y="18" width="570" height="296" fill="#f6f9fd"/><line x1="65" x2="635" y1="314" y2="314" stroke="#68778a"/><line x1="65" x2="65" y1="18" y2="314" stroke="#68778a"/><text x="350" y="358" text-anchor="middle" font-size="13" fill="#526074">${esc(x.name)} (${x.direction})</text><text x="12" y="180" transform="rotate(-90 12 180)" text-anchor="middle" font-size="13" fill="#526074">${esc(y.name)} (${y.direction})</text><text x="65" y="334" font-size="12" fill="#526074">${xmin}</text><text x="600" y="334" font-size="12" fill="#526074">${xmax}</text><text x="20" y="312" font-size="12" fill="#526074">${ymin}</text><text x="20" y="25" font-size="12" fill="#526074">${ymax}</text>${ranked.map(z=>{const a=p.alternatives.find(a=>a.id===z.id),cx=65+570*coord(z.objectives[x.id],xmin,dx),cy=314-296*coord(z.objectives[y.id],ymin,dy);return `<circle cx="${cx}" cy="${cy}" r="7" fill="${z.efficient?'#16839c':'#c48036'}" stroke="white" stroke-width="2"><title>${esc(a.name)}</title></circle><text x="${Math.min(cx+9,588)}" y="${Math.max(cy-10,15)}" font-size="12" fill="#26354a">${esc(a.name)}</text>`;}).join('')}</svg><p><span style="color:#16839c">●</span> Nondominated across all objectives · <span style="color:#c48036">●</span> Dominated. The plot is a projection; efficient points in higher dimensions may overlap or appear dominated in these two displayed dimensions.</p>`;}
+target.innerHTML=html;}catch(e){target.innerHTML=`<div class="alert">${esc(e.message)}</div>`;}}
+function render(){ $('steps').innerHTML=names.map((n,i)=>`<button data-step="${i}" class="${step===i?'selected':''}">${i+1}. ${n}</button>`).join('');$('view').innerHTML= (step===0?baseView():step===1?weightsView():step===2?evaluationView():resultsView())+`<div class="buttons"><button id="prev" ${step===0?'disabled':''}>← Back</button><span class="spacer"></span><button id="next" class="primary" ${step===3?'disabled':''}>Continue →</button></div>`;
+$('prev').onclick=()=>{step--;render()};$('next').onclick=()=>{step++;render()};document.querySelectorAll('[data-step]').forEach(el=>el.onclick=()=>{step=Number(el.dataset.step);render()});
+function bind(selector,event,fn){document.querySelectorAll(selector).forEach(el=>el.addEventListener(event,()=>update(()=>fn(el))));}
+if(step===0){bind('#title','change',el=>p.title=el.value);bind('[data-criterion]','change',el=>p.criteria.find(c=>c.id===el.dataset.criterion).name=el.value);bind('[data-alternative]','change',el=>p.alternatives.find(a=>a.id===el.dataset.alternative).name=el.value);bind('[data-delete-criterion]','click',el=>p.criteria=p.criteria.filter(c=>c.id!==el.dataset.deleteCriterion));bind('[data-delete-alternative]','click',el=>p.alternatives=p.alternatives.filter(a=>a.id!==el.dataset.deleteAlternative));$('addCriterion').onclick=()=>update(()=>{p.criteria.push({id:uid(),name:'New criterion',weight:0});p.weightAdjustment=null;});$('addAlternative').onclick=()=>update(()=>p.alternatives.push({id:uid(),name:'New alternative'}));}
+if(step===1){bind('[name=wm]','change',el=>{p.weightMethod=el.value;p.weightAdjustment=null;});bind('[data-weight]','change',el=>{p.criteria.find(c=>c.id===el.dataset.weight).weight=el.value===''?null:Number(el.value);p.weightAdjustment=null;});bind('[data-criterion-pair]','change',el=>{p.criteriaComparisons[el.dataset.criterionPair]=Number(el.value);p.weightAdjustment=null;});}
+if(step===2){bind('[name=em]','change',el=>p.evaluationMethod=el.value);bind('[data-score]','change',el=>{const [c,a]=el.dataset.score.split('|');(p.scores[c]??={})[a]=el.value===''?null:Number(el.value)});document.querySelectorAll('[data-alt-pair-]').forEach(()=>{});document.querySelectorAll('select').forEach(el=>{const key=Object.keys(el.dataset).find(k=>k.startsWith('altPair'));if(!key)return;el.onchange=()=>update(()=>{const criterion=key.slice('altPair'.length).replace(/^./,ch=>ch.toLowerCase());const c=p.criteria.find(x=>key.toLowerCase()==='altpair'+x.id.toLowerCase());if(c)(p.altComparisons[c.id]??={})[el.dataset[key]]=Number(el.value);});});}
+if(step===3){bind('[data-sens]','change',el=>{const i=Number(el.dataset.sens),raw=p.weightAdjustment??getWeights(),desired=Number(el.value)/100,rest=1-raw[i];p.weightAdjustment=raw.length===1?[1]:raw.map((v,j)=>j===i?desired:rest>0?v*(1-desired)/rest:(1-desired)/(raw.length-1));if(raw.length===1)p.weightAdjustment=[1];});$('resetSensitivity').onclick=()=>update(()=>p.weightAdjustment=null);$('addObjective').onclick=()=>update(()=>p.objectives.push({id:uid(),name:'New objective',direction:'maximize',values:{}}));bind('[data-objective-name]','change',el=>p.objectives.find(o=>o.id===el.dataset.objectiveName).name=el.value);bind('[data-direction]','change',el=>p.objectives.find(o=>o.id===el.dataset.direction).direction=el.value);bind('[data-objective-value]','change',el=>{const [oid,aid]=el.dataset.objectiveValue.split('|');p.objectives.find(o=>o.id===oid).values[aid]=el.value===''?'':Number(el.value)});bind('[data-delete-objective]','click',el=>p.objectives=p.objectives.filter(o=>o.id!==el.dataset.deleteObjective));if($('xAxis')){$('xAxis').onchange=renderFrontier;$('yAxis').onchange=renderFrontier;}renderFrontier();}}
+$('exportProject').onclick=()=>{const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(p.title||'ahp-project').replace(/[^a-z0-9-]/gi,'_')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)};
+$('importProject').onclick=()=>$('fileInput').click();$('fileInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());validateProject(d);p=d;step=0;persist();render();}catch(err){alert('Could not open project: '+err.message)}e.target.value='';};
+render();persist();
+</script></body></html>

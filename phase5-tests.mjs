@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {hierarchyWeights,validateHierarchy} from './hierarchy.mjs';
+import {reportData,reportHTML,workbookXML} from './reporting.mjs';
+import {synthesize} from './ahp-engine.mjs';
+const base=()=>({version:1,title:'<Audit & report>',criteria:[{id:'c1',name:'Cost',weight:75,groupId:'g1'},{id:'c2',name:'Quality',weight:25,groupId:'g1'},{id:'c3',name:'Risk',weight:100,groupId:'g2'}],alternatives:[{id:'a',name:'A'},{id:'b',name:'B'}],objectives:[{id:'o',name:'Cost',direction:'minimize',values:{a:40,b:50}}],scenarios:[],hierarchy:{enabled:true,method:'manual',groups:[{id:'g1',name:'Business',weight:40},{id:'g2',name:'Risk',weight:60}],groupComparisons:{},childComparisons:{}}});
+test('hierarchy manual global weights correct',()=>assert.deepEqual(hierarchyWeights(base()).weights.map(x=>+x.toFixed(8)),[.3,.1,.6]));
+test('manual sibling weights required total 100',()=>{const p=base();p.criteria[0].weight=50;assert.throws(()=>hierarchyWeights(p))});
+test('pairwise hierarchy maps root and local priorities correctly',()=>{const p=base();p.hierarchy.method='pairwise';p.hierarchy.groupComparisons={'g1|g2':2};p.hierarchy.childComparisons={'g1':{'c1|c2':3}};const z=hierarchyWeights(p);assert.deepEqual(z.weights.map(x=>+x.toFixed(8)),[.5,1/6,1/3].map(x=>+x.toFixed(8)));assert.equal(z.diagnostics.length,3)});
+test('reject unassigned leaf and empty group',()=>{const p=base();p.criteria[2].groupId='g1';assert.throws(()=>hierarchyWeights(p));assert.throws(()=>validateHierarchy(p))});
+test('reject malformed pairwise judgment and duplicate group',()=>{const p=base();p.hierarchy.groupComparisons={'g1|g2':-8};assert.throws(()=>validateHierarchy(p));p.hierarchy.groupComparisons={};p.hierarchy.groups[1].id='g1';assert.throws(()=>validateHierarchy(p))});
+test('flat project without hierarchy remains valid',()=>assert.equal(validateHierarchy({...base(),hierarchy:undefined}),true));
+const report=()=>{const p=base(),weights=hierarchyWeights(p).weights,columns=[[.8,.2],[.6,.4],[.25,.75]];return reportData(p,{weights,columns,ranked:synthesize(['a','b'],weights,columns)});};
+test('report contribution totals match synthesis',()=>{const r=report();for(const c of r.contributions){assert.ok(Math.abs(c.values.reduce((a,b)=>a+b,0)-c.total)<1e-12)}for(const x of r.rankings){assert.ok(Math.abs(x.score-r.contributions.find(c=>c.name===x.name).total)<1e-12)}});
+test('report escapes project title and contains complete breakdown',()=>{const r=report(),html=reportHTML(r);assert.ok(html.includes('&lt;Audit &amp; report&gt;'));assert.ok(!html.includes('<Audit & report>'));assert.ok(html.includes('Weighted score breakdown'))});
+test('Excel XML is well formed and contains numeric cells',()=>{const xml=workbookXML(report());assert.ok(xml.includes('ss:Type="Number"'));assert.ok(xml.includes('Worksheet ss:Name="Ranking"'));assert.ok(xml.includes('Worksheet ss:Name="Contributions"'))});
+test('report marks incomplete objective values without assigning zero',()=>{const p=base();delete p.objectives[0].values.b;const w=hierarchyWeights(p).weights;const cols=[[.8,.2],[.6,.4],[.25,.75]];assert.equal(reportData(p,{weights:w,columns:cols,ranked:synthesize(['a','b'],w,cols)}).frontier,null)});

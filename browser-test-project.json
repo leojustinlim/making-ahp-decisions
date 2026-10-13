@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "title": "Phase 3 test decision",
+  "criteria": [
+    {
+      "id": "c1",
+      "name": "Cost",
+      "weight": 40
+    },
+    {
+      "id": "c2",
+      "name": "Service quality",
+      "weight": 35
+    },
+    {
+      "id": "c3",
+      "name": "Sustainability",
+      "weight": 25
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "a1",
+      "name": "Provider A"
+    },
+    {
+      "id": "a2",
+      "name": "Provider B"
+    },
+    {
+      "id": "a3",
+      "name": "Provider C"
+    }
+  ],
+  "weightMethod": "pairwise",
+  "criteriaComparisons": {
+    "c1|c2": 1,
+    "c1|c3": 1,
+    "c2|c3": 1
+  },
+  "evaluationMethod": "pairwise",
+  "scores": {
+    "c1": {
+      "a1": 8,
+      "a2": 6,
+      "a3": 9
+    },
+    "c2": {
+      "a1": 7,
+      "a2": 9,
+      "a3": 5
+    },
+    "c3": {
+      "a1": 6,
+      "a2": 8,
+      "a3": 7
+    }
+  },
+  "altComparisons": {
+    "c1": {
+      "a1|a2": 1,
+      "a1|a3": 1,
+      "a2|a3": 1
+    },
+    "c2": {
+      "a1|a2": 1,
+      "a1|a3": 1,
+      "a2|a3": 1
+    },
+    "c3": {
+      "a1|a2": 1,
+      "a1|a3": 1,
+      "a2|a3": 1
+    }
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "name": "Annual cost (S$ thousand)",
+      "direction": "minimize",
+      "values": {
+        "a1": 90,
+        "a2": 110,
+        "a3": 80
+      }
+    },
+    {
+      "id": "o2",
+      "name": "Technical quality",
+      "direction": "maximize",
+      "values": {
+        "a1": 75,
+        "a2": 90,
+        "a3": 65
+      }
+    }
+  ],
+  "weightAdjustment": null
+}

@@ -1,0 +1,10 @@
+PASS: loads without startup errors and autosaves
+PASS: changes written to simulated browser storage (reload not verified)
+PASS: pairwise criteria weighting and consistency diagnostics
+PASS: pairwise alternatives, ranking and Pareto visualization
+PASS: pairwise results remain available during navigation
+PASS: JSON project export contains complete saved data
+PASS: JSON import recovers earlier project
+PASS: blank scores rejected and unfinished data stored
+PASS: no uncaught browser JavaScript exceptions
+Browser checks: 9/9 passed

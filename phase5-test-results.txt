@@ -1,0 +1,172 @@
+TAP version 13
+# Subtest: sample project schema validates
+ok 1 - sample project schema validates
+  ---
+  duration_ms: 2.094033
+  type: 'test'
+  ...
+# Subtest: reject malformed / imported project structures
+ok 2 - reject malformed / imported project structures
+  ---
+  duration_ms: 1.163874
+  type: 'test'
+  ...
+# Subtest: blank unfinished scores can persist as null and cannot calculate
+ok 3 - blank unfinished scores can persist as null and cannot calculate
+  ---
+  duration_ms: 1.02052
+  type: 'test'
+  ...
+# Subtest: permutation invariance in synthesis
+ok 4 - permutation invariance in synthesis
+  ---
+  duration_ms: 1.210357
+  type: 'test'
+  ...
+# Subtest: pairwise scale extremes are stable
+ok 5 - pairwise scale extremes are stable
+  ---
+  duration_ms: 6.727741
+  type: 'test'
+  ...
+# Subtest: Pareto invariance to positive affine objective scale transformations
+ok 6 - Pareto invariance to positive affine objective scale transformations
+  ---
+  duration_ms: 1.805563
+  type: 'test'
+  ...
+# Subtest: hierarchy manual global weights correct
+ok 7 - hierarchy manual global weights correct
+  ---
+  duration_ms: 2.170686
+  type: 'test'
+  ...
+# Subtest: manual sibling weights required total 100
+ok 8 - manual sibling weights required total 100
+  ---
+  duration_ms: 0.280069
+  type: 'test'
+  ...
+# Subtest: pairwise hierarchy maps root and local priorities correctly
+ok 9 - pairwise hierarchy maps root and local priorities correctly
+  ---
+  duration_ms: 0.900673
+  type: 'test'
+  ...
+# Subtest: reject unassigned leaf and empty group
+ok 10 - reject unassigned leaf and empty group
+  ---
+  duration_ms: 0.441423
+  type: 'test'
+  ...
+# Subtest: reject malformed pairwise judgment and duplicate group
+ok 11 - reject malformed pairwise judgment and duplicate group
+  ---
+  duration_ms: 0.29786
+  type: 'test'
+  ...
+# Subtest: flat project without hierarchy remains valid
+ok 12 - flat project without hierarchy remains valid
+  ---
+  duration_ms: 0.106979
+  type: 'test'
+  ...
+# Subtest: report contribution totals match synthesis
+ok 13 - report contribution totals match synthesis
+  ---
+  duration_ms: 0.959001
+  type: 'test'
+  ...
+# Subtest: report escapes project title and contains complete breakdown
+ok 14 - report escapes project title and contains complete breakdown
+  ---
+  duration_ms: 0.719256
+  type: 'test'
+  ...
+# Subtest: Excel XML is well formed and contains numeric cells
+ok 15 - Excel XML is well formed and contains numeric cells
+  ---
+  duration_ms: 1.801987
+  type: 'test'
+  ...
+# Subtest: report marks incomplete objective values without assigning zero
+ok 16 - report marks incomplete objective values without assigning zero
+  ---
+  duration_ms: 0.522117
+  type: 'test'
+  ...
+# Subtest: manual weights with percentage validation
+ok 17 - manual weights with percentage validation
+  ---
+  duration_ms: 3.673891
+  type: 'test'
+  ...
+# Subtest: pairwise construction: reciprocals, duplicate and missing values
+ok 18 - pairwise construction: reciprocals, duplicate and missing values
+  ---
+  duration_ms: 1.061152
+  type: 'test'
+  ...
+# Subtest: consistent matrix 3 items
+ok 19 - consistent matrix 3 items
+  ---
+  duration_ms: 0.694683
+  type: 'test'
+  ...
+# Subtest: equal judgments
+ok 20 - equal judgments
+  ---
+  duration_ms: 0.411372
+  type: 'test'
+  ...
+# Subtest: one/two comparison edge cases
+ok 21 - one/two comparison edge cases
+  ---
+  duration_ms: 0.282469
+  type: 'test'
+  ...
+# Subtest: inconsistent matrix triggers warning
+ok 22 - inconsistent matrix triggers warning
+  ---
+  duration_ms: 0.27212
+  type: 'test'
+  ...
+# Subtest: hierarchy recursively propagates global weights
+ok 23 - hierarchy recursively propagates global weights
+  ---
+  duration_ms: 0.56459
+  type: 'test'
+  ...
+# Subtest: distributive synthesis and result ordering
+ok 24 - distributive synthesis and result ordering
+  ---
+  duration_ms: 0.548799
+  type: 'test'
+  ...
+# Subtest: linear utility direction and clamping
+ok 25 - linear utility direction and clamping
+  ---
+  duration_ms: 0.506761
+  type: 'test'
+  ...
+# Subtest: Pareto: dominated, tradeoff and duplicates
+ok 26 - Pareto: dominated, tradeoff and duplicates
+  ---
+  duration_ms: 1.546482
+  type: 'test'
+  ...
+# Subtest: input safeguards
+ok 27 - input safeguards
+  ---
+  duration_ms: 0.943849
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 115.799457

@@ -1,0 +1,8 @@
+PASS advanced analytics renders in isolated Chromium
+PASS threshold selector works
+PASS simulation controls work
+PASS scenario save updates UI and simulated storage
+PASS scenario apply and remove works
+PASS JSON scenario export/import roundtrip
+PASS no JavaScript page errors
+7 isolated Chromium checks passed
