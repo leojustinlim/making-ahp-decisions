@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {validateProject} from './project-validation.mjs';
 import {manualWeights,calculateComparisons,paretoFront,synthesize} from './ahp-engine.mjs';
 const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-const source=html.match(/const newProject=\(\)=>\((\{.*?\})\);\nlet p/s)?.[1];
+const source=html.match(/const newProject=\(\)=>\((\{[^\n]*\})\);/)?.[1];
 const sample=Function('return ('+source+')')();
 const clone=x=>structuredClone(x);
 test('sample project schema validates',()=>assert.equal(validateProject(clone(sample)).version,1));
