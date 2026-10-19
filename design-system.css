@@ -75,3 +75,9 @@ label,.card label{font-size:14px;line-height:1.45}
 body:has(#ahpHelpDialog[open]){overflow:hidden;}
 #ahpHelpDialog{overflow:hidden;max-height:min(85dvh,85vh);}
 #ahpHelpDialog .ahp-help-content{max-height:min(85dvh,85vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;}
+
+/* v1.6.10: centre pairwise validation feedback beneath its own input cell. */
+.matrix-table td:has(.pairwise-field){text-align:center;vertical-align:middle;}
+.matrix-table .pairwise-field{display:block;margin-inline:auto;}
+.matrix-table .pairwise-error{display:block;width:112px;max-width:100%;margin:5px auto 0;text-align:center;line-height:1.35;overflow-wrap:anywhere;}
+.matrix-table .pairwise-error:empty{display:none;}
