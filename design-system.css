@@ -1,0 +1,64 @@
+
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172234;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.app{max-width:1130px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}h1{font-size:27px;margin:0}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px}p{line-height:1.5;color:#526074}.muted,small{color:#607086}.pill{font-size:12px;background:#e5eefb;color:#2057a4;padding:5px 9px;border-radius:30px}.card{border:1px solid #dce3ee;background:#fff;border-radius:15px;padding:20px;margin:12px 0;box-shadow:0 3px 12px #17223408}.toolbar,.row,.buttons{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row{margin:8px 0}.grow{flex:1;min-width:135px}.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.steps button{flex:1;min-width:95px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}input,select,button{font:inherit;border:1px solid #cbd6e5;border-radius:8px;padding:9px 11px;background:#fff;color:#172234}input[type=number]{width:105px}input[type=text]{max-width:100%}button{cursor:pointer}button:hover{border-color:#3665b6}button.primary,.steps button.selected{background:#2057a4;color:#fff;border-color:#2057a4}button.danger{color:#a33338}button:disabled{opacity:.5;cursor:not-allowed}label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#506078}.alert{background:#fff0ed;color:#953b30;padding:12px;border-radius:9px;margin:12px 0}.good{color:#23764a}.warning{color:#ae5d19}.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border-bottom:1px solid #e6ebf3;text-align:left}th{color:#4f5e73;background:#f6f8fc}td input{width:95px!important}.rank{font-weight:700}.bar{height:13px;border-radius:4px;background:#2370aa;min-width:2px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}#chart{width:100%;height:auto;max-height:400px}.spacer{flex:1}.inline{display:inline-flex;align-items:center;gap:7px}.footer{margin-top:32px;font-size:12px;color:#69788b}.tag{background:#edf3f9;border-radius:5px;padding:3px 6px;font-size:11px}@media(max-width:720px){.app{padding:12px}.result-grid{grid-template-columns:1fr}.card{padding:14px}.steps button{font-size:12px;padding:8px 4px}h1{font-size:22px}}
+ .help{font-size:12px;color:#607086}.outline{border-left:3px solid #b9cde7;margin:10px 0 10px 8px;padding:6px 0 6px 14px}.outline .row{margin:7px 0}.toolbar button{font-size:13px}.steps button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffba59;outline-offset:2px}@media print{header,.steps,.footer,.buttons{display:none!important}} .wizard{padding:20px;background:#f7faff;border:1px solid #d7e6f8;border-radius:16px;margin:16px 0}.choicegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{padding:20px 12px;font-size:16px;font-weight:650;min-height:90px}.choice.chosen{border:2px solid #246dc1;background:#eaf3ff}.decision-summary{background:#ecf7f5;border-left:4px solid #188b7e;border-radius:10px;padding:12px 16px;margin:16px 0}.decision-summary p{margin:6px 0}.steps{position:sticky;top:0;background:#f3f6fb;padding:9px 0;z-index:5}progress{accent-color:#246dc1}button:focus-visible{outline:3px solid #f6b753;outline-offset:2px}@media(max-width:520px){.choicegrid{grid-template-columns:1fr}.toolbar button{font-size:12px}} 
+.ahp-help-dialog{border:1px solid #d6e1ef;border-radius:18px;padding:0;max-width:min(570px,calc(100vw - 32px));max-height:85vh;box-shadow:0 24px 80px #132f5350;color:#172234}.ahp-help-dialog::backdrop{background:#0c234b92}.ahp-help-content{padding:24px;overflow:auto;max-height:85vh}.ahp-help-content h2{margin:0}.ahp-help-content p{margin:8px 0 15px}.ahp-help-content ol{padding-left:22px;line-height:1.6;color:#40516a}.ahp-help-content li{margin:8px 0}.ahp-glossary{margin:10px 0 18px}.ahp-glossary dt{font-weight:700;margin-top:12px;color:#172234}.ahp-glossary dd{margin:3px 0 0 0;color:#526074;line-height:1.5}.ahp-help-content .row{align-items:center}.ahp-help-content button{white-space:nowrap}@media(max-width:520px){.ahp-help-content{padding:18px}} 
+
+.sample-banner{background:#edf6ff;border:1px solid #bcdafa;border-radius:11px;padding:12px 15px;margin-bottom:16px}.sample-banner p{margin:4px 0 0;font-size:13px}/* v1.0 interface pass: clear information hierarchy, compact actions, accessible focus */
+.app{max-width:1180px;padding:24px 24px 44px}.site-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 18px;padding:12px 0 16px;border-bottom:1px solid #dce4f0}.site-header .tagline{color:#50647e;margin:5px 0 4px;font-size:15px}.site-header small{font-size:12px}.save-indicator{display:flex;gap:6px;align-items:center;flex:0 0 auto}.save-dot{width:8px;height:8px;background:#268563;border-radius:50%}.workspace-bar{background:#fff;border:1px solid #dbe5f1;border-radius:16px;padding:15px 18px 16px;margin-bottom:20px;box-shadow:0 5px 18px #16376309}.workspace-heading{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}.workspace-hint{font-size:12px;color:#68788d}.workspace-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}.action-group{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:0 12px 0 0;margin-right:4px;border-right:1px solid #dce4ed}.action-group:last-child{border:0;margin:0;padding:0}.workspace-actions button{padding:8px 10px;font-size:12px;white-space:nowrap;background:#f8fafd;border-color:#d9e3ef}.workspace-actions .action-accent{background:#e8f1ff;border-color:#a4c7f5;color:#184f98;font-weight:700}.workspace-actions button:hover{background:#ebf2fd}.card>label:first-child{display:flex;max-width:100%;gap:9px;margin-bottom:22px;font-size:14px;font-weight:650;color:#263d5a}.card>label:first-child input{width:min(100%,650px);min-height:44px;font-weight:400}.card input:focus-visible,.card select:focus-visible,button:focus-visible{outline:2px solid #db8a17;outline-offset:3px;box-shadow:none}.card>label:first-child:focus-within{margin-bottom:22px}.steps{top:0;z-index:4;border-bottom:1px solid #dce3ee}.steps button{min-height:43px}.card .grid>div{min-width:0}.footer{line-height:1.8;border-top:1px solid #dbe3ee;padding-top:16px}@media(max-width:780px){.app{padding:14px}.site-header{align-items:flex-start;gap:10px}.workspace-bar{padding:14px}.action-group{border:0;padding:0;width:100%;margin:0;border-bottom:1px solid #ecf0f5;padding-bottom:9px}.action-group:last-child{border:0;padding:0}.workspace-actions button{white-space:normal}.workspace-hint{display:block;width:100%}}@media(max-width:420px){.site-header{flex-direction:column}.workspace-actions button{flex:1}.site-header h1{font-size:24px}}
+
+#title{margin-bottom:16px!important;outline-offset:1px!important}#title:focus-visible{outline:2px solid #b56b00!important;box-shadow:0 0 0 4px #fff2d6!important}.card:has(#title)>.grid{margin-top:30px}.matrix-table{min-width:590px}.matrix-table th,.matrix-table td{text-align:center;vertical-align:middle}.matrix-table th:first-child{text-align:left}.matrix-table select{max-width:150px;width:100%;font-size:12px;padding:6px}.matrix-readonly{background:#f4f7fb;color:#526074}
+ .pairwise-field{width:112px!important;max-width:100%;font-variant-numeric:tabular-nums}.pairwise-field[aria-invalid=true]{border:2px solid #c33b2f;background:#fff3ef}.pairwise-error{display:block;color:#b12c26;font-size:11px;max-width:120px}.scale-guide{margin:18px 0 24px;background:#f5f8fc;border:1px solid #dce5f2;border-radius:10px;padding:16px}.scale-guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px;margin:10px 0}.matrix-table td{min-width:115px} .comparison-status{margin:12px 0 8px;display:grid;gap:6px}.comparison-status progress{width:100%;height:11px;accent-color:#226eb7}.consistency-review{margin:12px 0;padding:12px 15px;background:#fff8ed;border-left:4px solid #ce8a31;border-radius:6px}.consistency-review ol{margin:8px 0 0;padding-left:20px}.consistency-review li{padding:2px 0}.save-details{display:flex;flex-direction:column;gap:7px;max-width:275px}.save-details small{line-height:1.35;color:#526074}.save-indicator{align-items:flex-start}.save-dot{margin-top:9px;flex-shrink:0}.save-details .pill{align-self:flex-start}@media(max-width:600px){.save-details{max-width:100%}}.score-options,.readiness{background:#f5f9fd;border:1px solid #dbe5f0;padding:14px;border-radius:12px;margin:14px 0}.score-options label{max-width:320px}@media(max-width:680px){.table-scroll{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}.pairwise-field{min-height:42px;font-size:16px}.steps{overflow-x:auto;display:flex;flex-wrap:nowrap}.steps button{flex:0 0 auto;white-space:nowrap}.choicegrid{grid-template-columns:1fr}.buttons{flex-wrap:wrap}}.version-note{font-size:12px;color:#64748b;margin-top:8px}.weight-controls{margin:14px 0}.weight-control{align-items:end;gap:16px;margin:12px 0}.weight-control label.grow{min-width:180px}.weight-control input[type=range]{display:block;width:100%;margin-top:10px}.weight-number{width:126px;flex-shrink:0}.weight-number input{width:100%}@media(max-width:520px){.weight-control{flex-wrap:wrap}.weight-number{width:120px}}.scale-guide + .row{margin-top:4px;margin-bottom:18px;gap:10px;flex-wrap:wrap}.scale-guide + h3{margin-top:22px}/* Typography: consistent page and section hierarchy across the workflow. */
+:root{font-size:15px}
+.card h2,.card .section-heading{font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:#172234}
+.card h3{font-size:16px;font-weight:650;line-height:1.4;margin:20px 0 10px;color:#243650}
+.card p{font-size:14px;line-height:1.55}
+.card .help,.card p.help,.card .muted{font-size:13px;line-height:1.5}
+.card label{line-height:1.4}
+.card input,.card select,.card button{line-height:1.35}
+.decision-field{margin-bottom:24px}
+.decision-field .section-heading{display:block;margin-bottom:12px}
+.decision-field #title{display:block;width:min(100%,650px);min-height:44px;font-weight:400;margin-bottom:0!important}
+.card:has(.decision-field)>.grid{margin-top:0}
+@media(max-width:720px){.card h2,.card .section-heading{font-size:18px}.card h3{font-size:16px}}
+.eval-criterion-select{max-width:380px;margin:18px 0 12px;font-size:14px;font-weight:650}.eval-criterion-select select{margin-top:6px}.weights-summary{border-top:1px solid #dce3ee;margin-top:24px;padding-top:8px}.weights-summary table{max-width:680px}.weights-summary tfoot th{font-weight:700;background:#f6f8fc}
+/* v1.6: consolidated interface tokens and component normalization.
+   These rules supersede legacy incremental interface overrides. */
+:root {
+ --ui-ink:#172234; --ui-muted:#526278; --ui-accent:#2057a4;
+ --ui-surface:#fff; --ui-bg:#f3f6fb; --ui-line:#dce3ee;
+ --ui-space-1:4px; --ui-space-2:8px; --ui-space-3:12px;
+ --ui-space-4:16px; --ui-space-5:20px; --ui-space-6:24px;
+ --ui-radius-sm:8px; --ui-radius-md:12px; --ui-radius-lg:16px;
+ --ui-font-body:15px; --ui-font-small:13px; --ui-font-section:19px;
+ font-size:var(--ui-font-body); color:var(--ui-ink); background:var(--ui-bg);
+}
+body{color:var(--ui-ink);font-size:var(--ui-font-body)}
+h1,h2,h3,p{overflow-wrap:break-word}
+h1{font-size:27px;line-height:1.22;letter-spacing:-.02em}
+h2,.card h2,.card .section-heading{font-size:var(--ui-font-section);line-height:1.35;font-weight:700}
+h3,.card h3{font-size:16px;line-height:1.4;font-weight:650}
+p,.card p{line-height:1.6;font-size:14px}
+small,.help,.card .help,.card p.help{font-size:var(--ui-font-small);line-height:1.5}
+.card{background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius-lg);padding:var(--ui-space-5);margin:var(--ui-space-3) 0}
+.row,.toolbar,.buttons{gap:var(--ui-space-3)}
+.grid{gap:var(--ui-space-3)}
+button,input,select{font:inherit;font-size:14px;line-height:1.4;min-height:40px;border-radius:var(--ui-radius-sm);padding:9px 12px}
+button.primary,.steps button.selected{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #b56b00;outline-offset:2px}
+input[type=radio],input[type=checkbox]{min-height:auto}
+input[type=range]{padding:0;min-height:24px}
+label,.card label{font-size:14px;line-height:1.45}
+.steps{gap:var(--ui-space-2);padding:var(--ui-space-2) 0}
+.steps button{min-height:44px}
+.comparison-mode{margin:16px 0}
+.comparison-group-selector{display:flex;flex-direction:column;gap:8px;max-width:480px;font-weight:650;margin:16px 0}
+.comparison-group-selector select{width:100%;font-weight:400}
+.wizard{border-radius:var(--ui-radius-lg);padding:var(--ui-space-5)}
+.choice{min-height:88px}
+@media(max-width:720px){
+ .card{padding:var(--ui-space-4)}
+ h1{font-size:23px}
+ h2,.card h2,.card .section-heading{font-size:18px}
+ .wizard{padding:var(--ui-space-4)}
+ .steps button{font-size:13px}
+}
