@@ -71,11 +71,29 @@ label,.card label{font-size:14px;line-height:1.45}
 .monte-carlo-controls{align-items:flex-end;}
 .monte-carlo-controls > .muted{display:flex;align-items:center;min-height:40px;}
 
-/* v1.6.9: one scroll area for AHP help; prevent background document scrolling. */
+/* v1.6.11: single scrolling dialog surface; no nested scroll container. */
 body:has(#ahpHelpDialog[open]){overflow:hidden;}
-#ahpHelpDialog{overflow:hidden;max-height:min(85dvh,85vh);}
-#ahpHelpDialog .ahp-help-content{max-height:min(85dvh,85vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;}
-
+#whatIsAHP{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+#whatIsAHP .help-info-icon{display:block;flex:none;}
+#ahpHelpDialog{
+ box-sizing:border-box;display:none;
+ width:min(570px,calc(100vw - 32px));
+ max-width:min(570px,calc(100vw - 32px));
+ max-height:85vh;max-height:85dvh;
+ margin:auto;padding:0;
+ overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior:contain;
+ scrollbar-gutter:stable;
+}
+#ahpHelpDialog[open]{display:block;}
+#ahpHelpDialog .ahp-help-content{
+ padding:24px;max-height:none;
+ overflow:visible;
+}
+@media(max-width:520px){
+ #ahpHelpDialog{width:calc(100vw - 24px);max-width:calc(100vw - 24px);}
+ #ahpHelpDialog .ahp-help-content{padding:18px;}
+}
 /* v1.6.10: centre pairwise validation feedback beneath its own input cell. */
 .matrix-table td:has(.pairwise-field){text-align:center;vertical-align:middle;}
 .matrix-table .pairwise-field{display:block;margin-inline:auto;}
