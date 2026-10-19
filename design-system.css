@@ -70,3 +70,8 @@ label,.card label{font-size:14px;line-height:1.45}
 /* Align Monte Carlo simulation count with the select field, below its label. */
 .monte-carlo-controls{align-items:flex-end;}
 .monte-carlo-controls > .muted{display:flex;align-items:center;min-height:40px;}
+
+/* v1.6.9: one scroll area for AHP help; prevent background document scrolling. */
+body:has(#ahpHelpDialog[open]){overflow:hidden;}
+#ahpHelpDialog{overflow:hidden;max-height:min(85dvh,85vh);}
+#ahpHelpDialog .ahp-help-content{max-height:min(85dvh,85vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;}
