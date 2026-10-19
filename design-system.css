@@ -130,3 +130,7 @@ html{overflow-y:scroll;scrollbar-gutter:stable;}
 .matrix-table .pairwise-field{display:block;margin-inline:auto;}
 .matrix-table .pairwise-error{display:block;width:112px;max-width:100%;margin:5px auto 0;text-align:center;line-height:1.35;overflow-wrap:anywhere;}
 .matrix-table .pairwise-error:empty{display:none;}
+
+/* v1.6.17: consistent Efficient Frontier axis typography. */
+.frontier-chart .frontier-axis-title{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:13px;font-weight:600;fill:#526074;}
+.frontier-chart .frontier-axis-tick{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:12px;font-weight:400;fill:#526074;font-variant-numeric:tabular-nums;}
