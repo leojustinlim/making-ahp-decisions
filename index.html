@@ -178,12 +178,47 @@ if(locator){
  }
  if(window.scrollX!==savedScrollX||window.scrollY!==savedScrollY)window.scrollTo({left:savedScrollX,top:savedScrollY,behavior:'instant'});
  document.querySelectorAll('[data-step]').forEach(el=>el.onclick=()=>{step=Number(el.dataset.step);showLibrary=false;render()});
-if(showLibrary){$('libraryClose').onclick=()=>{showLibrary=false;render();};$('librarySave').onclick=()=>{try{const a=getLibrary();if(a.length>=15&&!confirm('My Projects holds up to 15 saved versions. Saving this project will replace the oldest one. Continue?'))return;a.unshift({date:new Date().toLocaleString(),project:JSON.parse(JSON.stringify(p))});setLibrary(a.slice(0,15));render();}catch(e){alert('Local library save failed: '+e.message)}};document.querySelectorAll('[data-library-open]').forEach(el=>el.onclick=()=>{const d=getLibrary()[Number(el.dataset.libraryOpen)]?.project;try{validateProject(d);validateHierarchy(d);if(!confirm('Open this saved project? It will replace your current working project.'))return;undoStack.push(JSON.stringify(p));p=JSON.parse(JSON.stringify(d));showLibrary=false;step=0;persist();render();}catch(e){alert('Could not open snapshot: '+e.message)}});document.querySelectorAll('[data-library-duplicate]').forEach(el=>el.onclick=()=>{const d=getLibrary()[Number(el.dataset.libraryDuplicate)]?.project;try{validateProject(d);validateHierarchy(d);undoStack.push(JSON.stringify(p));p=JSON.parse(JSON.stringify(d));p.title+=' (copy)';showLibrary=false;step=0;persist();render();}catch(e){alert('Could not duplicate: '+e.message)}});document.querySelectorAll('[data-library-delete]').forEach(el=>el.onclick=()=>{if(!confirm('Delete this local snapshot?'))return;const a=getLibrary();a.splice(Number(el.dataset.libraryDelete),1);setLibrary(a);render()});return;} $('prev').onclick=()=>{step--;render()};$('next').onclick=()=>{step++;render()};function bind(selector,event,fn){document.querySelectorAll(selector).forEach(el=>el.addEventListener(event,()=>update(()=>fn(el))));}
+if(showLibrary){$('libraryClose').onclick=()=>{showLibrary=false;render();};$('librarySave').onclick=()=>{try{const a=getLibrary();if(a.length>=15&&!confirm('My Projects holds up to 15 saved versions. Saving this project will replace the oldest one. Continue?'))return;a.unshift({date:new Date().toLocaleString(),project:JSON.parse(JSON.stringify(p))});setLibrary(a.slice(0,15));render();}catch(e){alert('Local library save failed: '+e.message)}};document.querySelectorAll('[data-library-open]').forEach(el=>el.onclick=()=>{const d=getLibrary()[Number(el.dataset.libraryOpen)]?.project;try{validateProject(d);validateHierarchy(d);if(!confirm('Open this saved project? It will replace your current working project.'))return;undoStack.push(JSON.stringify(p));p=JSON.parse(JSON.stringify(d));showLibrary=false;step=0;persist();render();}catch(e){alert('Could not open snapshot: '+e.message)}});document.querySelectorAll('[data-library-duplicate]').forEach(el=>el.onclick=()=>{const d=getLibrary()[Number(el.dataset.libraryDuplicate)]?.project;try{validateProject(d);validateHierarchy(d);undoStack.push(JSON.stringify(p));p=JSON.parse(JSON.stringify(d));p.title+=' (copy)';showLibrary=false;step=0;persist();render();}catch(e){alert('Could not duplicate: '+e.message)}});document.querySelectorAll('[data-library-delete]').forEach(el=>el.onclick=()=>{if(!confirm('Delete this local snapshot?'))return;const a=getLibrary();a.splice(Number(el.dataset.libraryDelete),1);setLibrary(a);render()});return;} $('prev').onclick=()=>{step--;render()};$('next').onclick=()=>{step++;render()};// Standard value edits commit without destroying the inputs. Rebuilding on blur
+// interrupts the user's next mouse click or Tab navigation.
+function refreshFieldFeedback(el){
+ if(el.matches('[data-weight],[data-hier-weight]')){
+  const summary=$('view').querySelector('.weights-summary');
+  if(summary){const t=document.createElement('template');t.innerHTML=criteriaWeightsSummary();summary.replaceWith(t.content.firstElementChild);}
+  if(el.matches('[data-weight]')){
+   const status=$('view').querySelector('section.card > p[role="status"]');
+   if(status){
+    const valid=p.criteria.every(c=>typeof c.weight==='number'&&Number.isFinite(c.weight)&&c.weight>=0&&c.weight<=100)&&Math.abs(sum(p.criteria.map(c=>c.weight))-100)<1e-8;
+    status.className=valid?'good':'warning';
+    status.textContent='Total: '+(p.criteria.every(c=>typeof c.weight==='number'&&Number.isFinite(c.weight))?uiFmt(sum(p.criteria.map(c=>c.weight))):'Incomplete')+'% · '+(valid?'Valid; weights total 100%.':'Weights must be between 0% and 100% and total exactly 100%. Results are blocked until corrected.');
+   }
+  }
+ }
+ if(step===4&&el.matches('[data-objective-name],[data-objective-value],[data-direction]'))renderFrontier();
+}
+function bind(selector,event,fn){
+ document.querySelectorAll(selector).forEach(el=>el.addEventListener(event,()=>{
+  const dataOnly=event==='change'&&(el.matches('input:not([type="radio"]):not([type="checkbox"]),textarea')||el.matches('select[data-direction]'));
+  if(update(()=>fn(el),{rerender:!dataOnly})&&dataOnly)refreshFieldFeedback(el);
+ }));
+}
+function refreshPairwiseFeedback(el,key,handler,rawValue){
+ const block=el.closest('.pairwise-matrix-block');
+ if(!block)return;
+ const record=handler==='criterion-pair'?p.criteriaComparisons:handler.startsWith('hier-pair-')?(handler.slice(10)==='root'?p.hierarchy.groupComparisons:(p.hierarchy.childComparisons[handler.slice(10)]??{})):handler.startsWith('alt-pair-')?(p.altComparisons[handler.slice(9)]??{}):null;
+ const items=handler==='criterion-pair'?p.criteria:handler.startsWith('hier-pair-')?(handler.slice(10)==='root'?p.hierarchy.groups:p.criteria.filter(c=>c.groupId===handler.slice(10))):handler.startsWith('alt-pair-')?p.alternatives:null;
+ if(!record||!items)return;
+ const reciprocal=Array.from(block.querySelectorAll('[data-reciprocal]')).find(x=>x.dataset.reciprocal===key);
+ if(reciprocal)reciprocal.textContent=rawValue===null?'—':fraction(1/rawValue);
+ const feedback=block.querySelector('.pairwise-feedback');
+ if(feedback)feedback.innerHTML=consistencyReview(items,record);
+ const summary=$('view').querySelector('.weights-summary');
+ if(summary&&step===1){const t=document.createElement('template');t.innerHTML=criteriaWeightsSummary();summary.replaceWith(t.content.firstElementChild);}
+}
 function bindPairwiseInputs(){
 document.querySelectorAll('.pairwise-field').forEach(el=>{
  const validate=()=>{try{if(!el.value.trim()){el.setCustomValidity('Enter a comparison value.');el.setAttribute('aria-invalid','true');el.nextElementSibling.textContent='Enter a comparison value.';return null;}const v=parseJudgement(el.value);el.setCustomValidity('');el.setAttribute('aria-invalid','false');el.nextElementSibling.textContent='';return v;}catch(e){el.setCustomValidity(e.message);el.setAttribute('aria-invalid','true');el.nextElementSibling.textContent=e.message;return null;}};
- el.addEventListener('input',()=>{const v=validate();if(v!==null)return;const attr=[...el.attributes].find(a=>a.name.startsWith('data-')&&a.name!=='data-reciprocal');if(!attr)return;const key=attr.value,handler=attr.name.slice(5);if(handler==='criterion-pair')delete p.criteriaComparisons[key];else if(handler.startsWith('hier-pair-')){const group=handler.slice(10);const record=group==='root'?p.hierarchy.groupComparisons:(p.hierarchy.childComparisons[group]??={});delete record[key];}else if(handler.startsWith('alt-pair-')){const id=handler.slice(9);delete (p.altComparisons[id]??={})[key];}p.weightAdjustment=null;persist();const twin=document.querySelector('[data-reciprocal="'+key+'"]');if(twin)twin.textContent='—';});
- el.addEventListener('change',()=>{const v=validate();if(v===null)return;const attr=[...el.attributes].find(a=>a.name.startsWith('data-')&&a.name!=='data-reciprocal');if(!attr)return;const key=attr.value,handler=attr.name.slice(5);update(()=>{if(handler==='criterion-pair'){p.criteriaComparisons[key]=v;p.weightAdjustment=null;}else if(handler.startsWith('hier-pair-')){const group=handler.slice(10);const record=group==='root'?p.hierarchy.groupComparisons:(p.hierarchy.childComparisons[group]??={});record[key]=v;p.weightAdjustment=null;}else if(handler.startsWith('alt-pair-')){const id=handler.slice(9);(p.altComparisons[id]??={})[key]=v;}});});
+ el.addEventListener('input',()=>{const v=validate();if(v!==null)return;const attr=[...el.attributes].find(a=>a.name.startsWith('data-')&&a.name!=='data-reciprocal');if(!attr)return;const key=attr.value,handler=attr.name.slice(5);if(handler==='criterion-pair')delete p.criteriaComparisons[key];else if(handler.startsWith('hier-pair-')){const group=handler.slice(10);const record=group==='root'?p.hierarchy.groupComparisons:(p.hierarchy.childComparisons[group]??={});delete record[key];}else if(handler.startsWith('alt-pair-')){const id=handler.slice(9);delete (p.altComparisons[id]??={})[key];}p.weightAdjustment=null;persist();refreshPairwiseFeedback(el,key,handler,null);});
+ el.addEventListener('change',()=>{const v=validate();if(v===null)return;const attr=[...el.attributes].find(a=>a.name.startsWith('data-')&&a.name!=='data-reciprocal');if(!attr)return;const key=attr.value,handler=attr.name.slice(5);update(()=>{if(handler==='criterion-pair'){p.criteriaComparisons[key]=v;p.weightAdjustment=null;}else if(handler.startsWith('hier-pair-')){const group=handler.slice(10);const record=group==='root'?p.hierarchy.groupComparisons:(p.hierarchy.childComparisons[group]??={});record[key]=v;p.weightAdjustment=null;}else if(handler.startsWith('alt-pair-')){const id=handler.slice(9);(p.altComparisons[id]??={})[key]=v;}},{rerender:false});refreshPairwiseFeedback(el,key,handler,v);});
 });
 }
 
