@@ -62,3 +62,7 @@ label,.card label{font-size:14px;line-height:1.45}
  .wizard{padding:var(--ui-space-4)}
  .steps button{font-size:13px}
 }
+
+/* v1.6.5: align frontier row actions with the form controls, not their labels. */
+.frontier-objective-header{align-items:flex-end;}
+.frontier-objective-header > button[data-delete-objective]{align-self:flex-end;min-height:40px;}
