@@ -66,3 +66,7 @@ label,.card label{font-size:14px;line-height:1.45}
 /* v1.6.5: align frontier row actions with the form controls, not their labels. */
 .frontier-objective-header{align-items:flex-end;}
 .frontier-objective-header > button[data-delete-objective]{align-self:flex-end;min-height:40px;}
+
+/* Align Monte Carlo simulation count with the select field, below its label. */
+.monte-carlo-controls{align-items:flex-end;}
+.monte-carlo-controls > .muted{display:flex;align-items:center;min-height:40px;}
