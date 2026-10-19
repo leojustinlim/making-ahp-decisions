@@ -178,7 +178,7 @@ function render(){
  const locator=identity?{attribute:identity,value:previousField.getAttribute(identity)}:null;
  const caret=editing&&previousField.tagName==='INPUT'&&previousField.type==='text'?previousField.selectionStart:null;
  const savedScrollX=window.scrollX,savedScrollY=window.scrollY;
- $('undoButton').disabled=!undoStack.length; $('steps').innerHTML=names.map((n,i)=>`<button data-step="${i}" class="${step===i?'selected':''}">${i+1}. ${n}</button>`).join('');$('view').innerHTML= (showLibrary?libraryView():(step===0?baseView():step===1?weightsView():step===2?evaluationView():step===3?resultsView():analyticsView()))+`<div class="buttons"><button id="prev" ${step===0?'disabled':''}>← Back</button><span class="spacer"></span><button id="next" class="primary" ${step===names.length-1?'disabled':''}>Continue →</button></div>`;
+ $('undoButton').disabled=!undoStack.length; $('steps').innerHTML=names.map((n,i)=>`<button data-step="${i}" class="${step===i?'selected':''}">${i+1}. ${n}</button>`).join('');$('view').innerHTML= (showLibrary?libraryView():(step===0?baseView():step===1?weightsView():step===2?evaluationView():step===3?resultsView():analyticsView()))+(showLibrary?'':`<div class="buttons"><button id="prev" ${step===0?'disabled':''}>← Back</button><span class="spacer"></span><button id="next" class="primary" ${step===names.length-1?'disabled':''}>Continue →</button></div>`);
 if(locator){
   const candidates=previousView.querySelectorAll('input,select,textarea');
   const replacement=Array.from(candidates).find(el=>el.getAttribute(locator.attribute)===locator.value);
