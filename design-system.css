@@ -75,7 +75,8 @@ label,.card label{font-size:14px;line-height:1.45}
 /* Reserve the viewport's scrollbar track even while a modal locks page scrolling.
    Without this, centred content can move horizontally when the scrollbar disappears. */
 html{scrollbar-gutter:stable;}
-html.ahp-modal-open,body.ahp-modal-open{overflow:hidden;}
+html.ahp-modal-open{overflow-y:scroll;}
+body.ahp-modal-open{overflow:visible;}
 #whatIsAHP{display:inline-flex;align-items:center;justify-content:center;gap:10px;line-height:1.4;white-space:nowrap;}
 #whatIsAHP .help-info-icon{display:block;flex:0 0 18px;width:18px;height:18px;}
 #whatIsAHP span{display:block;line-height:1.4;}
