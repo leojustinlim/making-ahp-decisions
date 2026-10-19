@@ -1,7 +1,7 @@
 
 :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172234;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.app{max-width:1130px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}h1{font-size:27px;margin:0}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px}p{line-height:1.5;color:#526074}.muted,small{color:#607086}.pill{font-size:12px;background:#e5eefb;color:#2057a4;padding:5px 9px;border-radius:30px}.card{border:1px solid #dce3ee;background:#fff;border-radius:15px;padding:20px;margin:12px 0;box-shadow:0 3px 12px #17223408}.toolbar,.row,.buttons{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row{margin:8px 0}.grow{flex:1;min-width:135px}.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.steps button{flex:1;min-width:95px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}input,select,button{font:inherit;border:1px solid #cbd6e5;border-radius:8px;padding:9px 11px;background:#fff;color:#172234}input[type=number]{width:105px}input[type=text]{max-width:100%}button{cursor:pointer}button:hover{border-color:#3665b6}button.primary,.steps button.selected{background:#2057a4;color:#fff;border-color:#2057a4}button.danger{color:#a33338}button:disabled{opacity:.5;cursor:not-allowed}label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#506078}.alert{background:#fff0ed;color:#953b30;padding:12px;border-radius:9px;margin:12px 0}.good{color:#23764a}.warning{color:#ae5d19}.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border-bottom:1px solid #e6ebf3;text-align:left}th{color:#4f5e73;background:#f6f8fc}td input{width:95px!important}.rank{font-weight:700}.bar{height:13px;border-radius:4px;background:#2370aa;min-width:2px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}#chart{width:100%;height:auto;max-height:400px}.spacer{flex:1}.inline{display:inline-flex;align-items:center;gap:7px}.footer{margin-top:32px;font-size:12px;color:#69788b}.tag{background:#edf3f9;border-radius:5px;padding:3px 6px;font-size:11px}@media(max-width:720px){.app{padding:12px}.result-grid{grid-template-columns:1fr}.card{padding:14px}.steps button{font-size:12px;padding:8px 4px}h1{font-size:22px}}
  .help{font-size:12px;color:#607086}.outline{border-left:3px solid #b9cde7;margin:10px 0 10px 8px;padding:6px 0 6px 14px}.outline .row{margin:7px 0}.toolbar button{font-size:13px}.steps button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffba59;outline-offset:2px}@media print{header,.steps,.footer,.buttons{display:none!important}} .wizard{padding:20px;background:#f7faff;border:1px solid #d7e6f8;border-radius:16px;margin:16px 0}.choicegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{padding:20px 12px;font-size:16px;font-weight:650;min-height:90px}.choice.chosen{border:2px solid #246dc1;background:#eaf3ff}.decision-summary{background:#ecf7f5;border-left:4px solid #188b7e;border-radius:10px;padding:12px 16px;margin:16px 0}.decision-summary p{margin:6px 0}.steps{position:sticky;top:0;background:#f3f6fb;padding:9px 0;z-index:5}progress{accent-color:#246dc1}button:focus-visible{outline:3px solid #f6b753;outline-offset:2px}@media(max-width:520px){.choicegrid{grid-template-columns:1fr}.toolbar button{font-size:12px}} 
-.ahp-help-dialog{border:1px solid #d6e1ef;border-radius:18px;padding:0;max-width:min(570px,calc(100vw - 32px));max-height:85vh;box-shadow:0 24px 80px #132f5350;color:#172234}.ahp-help-dialog::backdrop{background:#0c234b92}.ahp-help-content{padding:24px;overflow:auto;max-height:85vh}.ahp-help-content h2{margin:0}.ahp-help-content p{margin:8px 0 15px}.ahp-help-content ol{padding-left:22px;line-height:1.6;color:#40516a}.ahp-help-content li{margin:8px 0}.ahp-glossary{margin:10px 0 18px}.ahp-glossary dt{font-weight:700;margin-top:12px;color:#172234}.ahp-glossary dd{margin:3px 0 0 0;color:#526074;line-height:1.5}.ahp-help-content .row{align-items:center}.ahp-help-content button{white-space:nowrap}@media(max-width:520px){.ahp-help-content{padding:18px}} 
+.ahp-help-dialog{border:1px solid #d6e1ef;border-radius:18px;padding:0;box-shadow:0 24px 80px #132f5350;color:#172234}.ahp-help-dialog::backdrop{background:#0c234b92}.ahp-help-content{padding:24px}.ahp-help-content h2{margin:0}.ahp-help-content p{margin:8px 0 15px}.ahp-help-content ol{padding-left:22px;line-height:1.6;color:#40516a}.ahp-help-content li{margin:8px 0}.ahp-glossary{margin:10px 0 18px}.ahp-glossary dt{font-weight:700;margin-top:12px;color:#172234}.ahp-glossary dd{margin:3px 0 0 0;color:#526074;line-height:1.5}.ahp-help-content .row{align-items:center}.ahp-help-content button{white-space:nowrap}@media(max-width:520px){.ahp-help-content{padding:18px}} 
 
 .sample-banner{background:#edf6ff;border:1px solid #bcdafa;border-radius:11px;padding:12px 15px;margin-bottom:16px}.sample-banner p{margin:4px 0 0;font-size:13px}/* v1.0 interface pass: clear information hierarchy, compact actions, accessible focus */
 .app{max-width:1180px;padding:24px 24px 44px}.site-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 18px;padding:12px 0 16px;border-bottom:1px solid #dce4f0}.site-header .tagline{color:#50647e;margin:5px 0 4px;font-size:15px}.site-header small{font-size:12px}.save-indicator{display:flex;gap:6px;align-items:center;flex:0 0 auto}.save-dot{width:8px;height:8px;background:#268563;border-radius:50%}.workspace-bar{background:#fff;border:1px solid #dbe5f1;border-radius:16px;padding:15px 18px 16px;margin-bottom:20px;box-shadow:0 5px 18px #16376309}.workspace-heading{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}.workspace-hint{font-size:12px;color:#68788d}.workspace-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}.action-group{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:0 12px 0 0;margin-right:4px;border-right:1px solid #dce4ed}.action-group:last-child{border:0;margin:0;padding:0}.workspace-actions button{padding:8px 10px;font-size:12px;white-space:nowrap;background:#f8fafd;border-color:#d9e3ef}.workspace-actions .action-accent{background:#e8f1ff;border-color:#a4c7f5;color:#184f98;font-weight:700}.workspace-actions button:hover{background:#ebf2fd}.card>label:first-child{display:flex;max-width:100%;gap:9px;margin-bottom:22px;font-size:14px;font-weight:650;color:#263d5a}.card>label:first-child input{width:min(100%,650px);min-height:44px;font-weight:400}.card input:focus-visible,.card select:focus-visible,button:focus-visible{outline:2px solid #db8a17;outline-offset:3px;box-shadow:none}.card>label:first-child:focus-within{margin-bottom:22px}.steps{top:0;z-index:4;border-bottom:1px solid #dce3ee}.steps button{min-height:43px}.card .grid>div{min-width:0}.footer{line-height:1.8;border-top:1px solid #dbe3ee;padding-top:16px}@media(max-width:780px){.app{padding:14px}.site-header{align-items:flex-start;gap:10px}.workspace-bar{padding:14px}.action-group{border:0;padding:0;width:100%;margin:0;border-bottom:1px solid #ecf0f5;padding-bottom:9px}.action-group:last-child{border:0;padding:0}.workspace-actions button{white-space:normal}.workspace-hint{display:block;width:100%}}@media(max-width:420px){.site-header{flex-direction:column}.workspace-actions button{flex:1}.site-header h1{font-size:24px}}
@@ -71,28 +71,55 @@ label,.card label{font-size:14px;line-height:1.45}
 .monte-carlo-controls{align-items:flex-end;}
 .monte-carlo-controls > .muted{display:flex;align-items:center;min-height:40px;}
 
-/* v1.6.11: single scrolling dialog surface; no nested scroll container. */
-body:has(#ahpHelpDialog[open]){overflow:hidden;}
-#whatIsAHP{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-#whatIsAHP .help-info-icon{display:block;flex:none;}
+/* v1.6.12: One scrolling region inside a fixed dialog shell. */
+html.ahp-modal-open,body.ahp-modal-open{overflow:hidden;}
+#whatIsAHP{display:inline-flex;align-items:center;justify-content:center;gap:10px;line-height:1.4;white-space:nowrap;}
+#whatIsAHP .help-info-icon{display:block;flex:0 0 18px;width:18px;height:18px;}
+#whatIsAHP span{display:block;line-height:1.4;}
 #ahpHelpDialog{
- box-sizing:border-box;display:none;
- width:min(570px,calc(100vw - 32px));
- max-width:min(570px,calc(100vw - 32px));
- max-height:85vh;max-height:85dvh;
- margin:auto;padding:0;
- overflow-y:auto;overflow-x:hidden;
- overscroll-behavior:contain;
- scrollbar-gutter:stable;
+ display:none;
+ position:fixed;
+ inset:0;
+ margin:auto;
+ width:min(590px,calc(100vw - 32px));
+ max-width:calc(100vw - 32px);
+ height:auto;
+ max-height:85vh;
+ max-height:85dvh;
+ overflow:hidden;
+ padding:0;
 }
-#ahpHelpDialog[open]{display:block;}
+#ahpHelpDialog[open]{display:flex;flex-direction:column;}
+#ahpHelpDialog .ahp-help-header{
+ display:flex;
+ align-items:center;
+ gap:12px;
+ flex:0 0 auto;
+ padding:16px 24px;
+ border-bottom:1px solid #e6ebf3;
+}
+#ahpHelpDialog .ahp-help-header h2{margin:0;flex:1;font-size:19px;line-height:1.35;}
 #ahpHelpDialog .ahp-help-content{
- padding:24px;max-height:none;
- overflow:visible;
+ flex:1 1 auto;
+ min-height:0;
+ max-height:none;
+ padding:18px 24px;
+ overflow-x:hidden;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+}
+#ahpHelpDialog .ahp-help-footer{
+ display:flex;
+ justify-content:flex-end;
+ flex:0 0 auto;
+ padding:14px 24px;
+ border-top:1px solid #e6ebf3;
 }
 @media(max-width:520px){
  #ahpHelpDialog{width:calc(100vw - 24px);max-width:calc(100vw - 24px);}
- #ahpHelpDialog .ahp-help-content{padding:18px;}
+ #ahpHelpDialog .ahp-help-header{padding:14px 18px;}
+ #ahpHelpDialog .ahp-help-content{padding:16px 18px;}
+ #ahpHelpDialog .ahp-help-footer{padding:12px 18px;}
 }
 /* v1.6.10: centre pairwise validation feedback beneath its own input cell. */
 .matrix-table td:has(.pairwise-field){text-align:center;vertical-align:middle;}
