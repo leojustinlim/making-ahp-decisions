@@ -157,14 +157,16 @@ let analyticsCriterion=0,analyticsRange=.2,analyticsWeights=null;
 
 function renderFrontier(){const target=$('frontier');if(!target)return;try{const directions=Object.fromEntries(p.objectives.map(o=>[o.id,o.direction]));const pts=p.alternatives.map(a=>({id:a.id,objectives:Object.fromEntries(p.objectives.map(o=>[o.id,o.values[a.id]]))}));for(const a of p.alternatives)for(const o of p.objectives)if(typeof o.values[a.id]!=='number'||!Number.isFinite(o.values[a.id]))throw Error(`Enter ${o.name} for ${a.name}`);
 const ranked=paretoFront(pts,directions);const efficient=ranked.filter(r=>r.efficient).length;let html=`<p><strong>${efficient} of ${ranked.length}</strong> alternatives are nondominated across all ${p.objectives.length} objective(s).</p><p>${ranked.map(r=>`${esc(p.alternatives.find(a=>a.id===r.id).name)}: <strong class="${r.efficient?'good':'warning'}">${r.efficient?'Efficient':'Dominated'}</strong>`).join(' · ')}</p>`;
-if(p.objectives.length>=2){const x=p.objectives.find(o=>o.id===$('xAxis').value)??p.objectives[0],y=p.objectives.find(o=>o.id===$('yAxis').value)??p.objectives[1];if(x.id===y.id)throw Error('Choose two different parameters for the horizontal and vertical axes.');const projected=projectionFront(pts,directions,x.id,y.id);const mismatch=projected.filter(z=>z.efficientAll!==z.efficient2D).length;const frontier2D=projected.filter(z=>z.efficient2D).sort((a,b)=>a.objectives[x.id]-b.objectives[x.id]);const xv=pts.map(z=>z.objectives[x.id]),yv=pts.map(z=>z.objectives[y.id]);// Add 8% of the observed range to each end. For identical values,
-// use 8% of their magnitude (or 1 for zero) to avoid a zero-width axis.
+if(p.objectives.length>=2){const x=p.objectives.find(o=>o.id===$('xAxis').value)??p.objectives[0],y=p.objectives.find(o=>o.id===$('yAxis').value)??p.objectives[1];if(x.id===y.id)throw Error('Choose two different parameters for the horizontal and vertical axes.');const projected=projectionFront(pts,directions,x.id,y.id);const mismatch=projected.filter(z=>z.efficientAll!==z.efficient2D).length;const frontier2D=projected.filter(z=>z.efficient2D).sort((a,b)=>a.objectives[x.id]-b.objectives[x.id]);const xv=pts.map(z=>z.objectives[x.id]),yv=pts.map(z=>z.objectives[y.id]);// Pad each axis without allowing a distant maximum to create a negative
+// minimum when all input values are non-negative. Keep integer tick labels.
 const paddedExtent=values=>{
  const lower=Math.min(...values),upper=Math.max(...values),range=upper-lower;
- const padding=0.08*(range||Math.max(Math.abs(lower),Math.abs(upper),1));
- // Round the padded endpoints outward so axis labels are whole numbers
- // and decimal-valued observations remain within the plot area.
- return [Math.floor(lower-padding),Math.ceil(upper+padding)];
+ const span=range||Math.max(Math.abs(lower),Math.abs(upper),1);
+ const lowerPadding=lower>0?Math.min(0.08*span,0.08*lower):0.08*span;
+ const upperPadding=upper<0?Math.min(0.08*span,0.08*Math.abs(upper)):0.08*span;
+ const axisMin=Math.floor(lower>=0?Math.max(0,lower-lowerPadding):lower-lowerPadding);
+ const axisMax=Math.ceil(upper<=0?Math.min(0,upper+upperPadding):upper+upperPadding);
+ return axisMin===axisMax?[axisMin,axisMax+1]:[axisMin,axisMax];
 };
 const [xmin,xmax]=paddedExtent(xv),[ymin,ymax]=paddedExtent(yv);
 const dx=xmax-xmin,dy=ymax-ymin;
