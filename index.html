@@ -37,7 +37,8 @@ function update(fn,{rerender=true}={}){
  const before=JSON.stringify(p);
  try{fn();}catch(e){p=JSON.parse(before);alert('Change could not be saved: '+e.message);if(rerender)render();return false;}
  if(JSON.stringify(p)===before)return true;
- analyticsWeights=null;
+ // Editing separate frontier objectives must not discard an active what-if scenario.
+ if(step!==4||rerender)analyticsWeights=null;
  undoStack.push(before);
  if(undoStack.length>30)undoStack.shift();
  persist();
