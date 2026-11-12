@@ -134,3 +134,16 @@ html{overflow-y:scroll;scrollbar-gutter:stable;}
 /* v1.6.17: consistent Efficient Frontier axis typography. */
 .frontier-chart .frontier-axis-title{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:13px;font-weight:600;fill:#526074;}
 .frontier-chart .frontier-axis-tick{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:12px;font-weight:400;fill:#526074;font-variant-numeric:tabular-nums;}
+
+
+/* Progressive technical explanation within the AHP help dialog. */
+.ahp-technical{margin-top:18px;border-top:1px solid #dce4ed;padding-top:15px}
+.ahp-technical summary{cursor:pointer;font-weight:700;color:#184f98;line-height:1.45}
+.ahp-technical summary:focus-visible{outline:2px solid #db8a17;outline-offset:4px;border-radius:3px}
+.ahp-technical-hint{font-size:12px;font-weight:400;color:#68788d;margin-left:5px}
+.ahp-technical-body{padding-top:12px}
+.ahp-technical-body h4{font-size:14px;line-height:1.4;margin:19px 0 7px;color:#172234}
+.ahp-technical-body p{line-height:1.6}
+.ahp-equation{display:block;overflow-x:auto;padding:12px 14px;margin:10px 0 12px;background:#f5f8fc;border:1px solid #e0e8f2;border-radius:8px;color:#203c61;font-size:15px;line-height:1.7;white-space:nowrap}
+.ahp-technical-body code{font-family:inherit;font-size:inherit}
+@media(max-width:520px){.ahp-equation{font-size:13px;padding:10px}.ahp-technical-hint{display:block;margin-left:0}}
