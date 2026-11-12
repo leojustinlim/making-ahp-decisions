@@ -12,6 +12,30 @@
 </dl>
 <p><strong>How it works:</strong> Define your options and criteria → assign importance using pairwise comparisons (or direct percentages) → evaluate each option → review rankings and trade-offs.</p>
 <p class="help">Traditional AHP calculates weights from pairwise comparisons. <strong>Manual weighting</strong> is a faster alternative if you already know the percentages you want to use; it does not have a pairwise consistency ratio.</p>
+<details class="ahp-technical"><summary>Explore the mathematics behind AHP <span class="ahp-technical-hint">Formulas and explanations</span></summary><div class="ahp-technical-body">
+<p>The formulas below describe how <strong>Making AHP Decisions</strong> calculates results when you use pairwise comparisons. You do not need to know them to use the tool.</p>
+<h4>1. Build the pairwise comparison matrix</h4>
+<p>For <em>n</em> criteria (or alternatives), each judgement becomes an entry <code>a<sub>ij</sub></code> in a square matrix <code>A</code>. Comparing an item with itself gives 1, and the reverse comparison is its reciprocal:</p>
+<div class="ahp-equation" role="math" aria-label="a sub i i equals 1; a sub j i equals 1 divided by a sub i j">a<sub>ii</sub> = 1 &nbsp;;&nbsp; a<sub>ji</sub> = 1 / a<sub>ij</sub></div>
+<p>For example, if criterion A is judged three times as important as criterion B, <code>a<sub>AB</sub> = 3</code> and <code>a<sub>BA</sub> = 1/3</code>. Judgements use Saaty's 1–9 scale (including reciprocals).</p>
+<h4>2. Calculate the priority weights</h4>
+<p>The tool finds the <strong>principal eigenvector</strong> of the comparison matrix, using an iterative calculation, and normalises its values so the weights sum to 1 (100%):</p>
+<div class="ahp-equation" role="math" aria-label="A times w equals lambda max times w; sum of weights equals 1">A<strong>w</strong> = λ<sub>max</sub><strong>w</strong> &nbsp;;&nbsp; ∑<sub>i=1</sub><sup>n</sup> w<sub>i</sub> = 1</div>
+<p>Here, <code>w<sub>i</sub></code> is an item's weight, and <code>λ<sub>max</sub></code> is the matrix's largest eigenvalue. A higher weight means that item has greater relative priority.</p>
+<h4>3. Check judgement consistency</h4>
+<p>The <strong>Consistency Index (CI)</strong> estimates the inconsistency in your comparisons; dividing it by Saaty's <strong>Random Index (RI)</strong> gives the <strong>Consistency Ratio (CR)</strong>:</p>
+<div class="ahp-equation" role="math" aria-label="C I equals lambda max minus n divided by n minus 1; C R equals C I divided by R I">CI = (λ<sub>max</sub> − n) / (n − 1) &nbsp;;&nbsp; CR = CI / RI<sub>n</sub></div>
+<p><code>n</code> is the number of items being compared; <code>RI<sub>n</sub></code> is a reference value for a matrix of that size. The tool reports <code>CR = 0</code> for one or two items, and uses RI values for matrices of 3–10 items. <strong>CR ≤ 0.10</strong> is a commonly used guideline, but it does not prove that the judgements themselves are correct.</p>
+<h4>4. Combine weights in a hierarchy</h4>
+<p>For a two-level hierarchy, a subcriterion's <strong>global weight</strong> is its parent criterion/group weight multiplied by the subcriterion's local weight:</p>
+<div class="ahp-equation" role="math" aria-label="Global weight of subcriterion equals parent weight times local weight">w<sub>global, i</sub> = w<sub>parent</sub> × w<sub>local, i</sub></div>
+<p>For example, a subcriterion with a 40% local weight under a group weighted at 30% has a global weight of <strong>12%</strong>.</p>
+<h4>5. Calculate the final alternative scores</h4>
+<p>Each alternative receives a local priority under each criterion. The tool uses <strong>weighted-sum (distributive) synthesis</strong> to combine those priorities:</p>
+<div class="ahp-equation" role="math" aria-label="Score of alternative j equals sum over criteria i of criterion weight i times alternative j priority under criterion i">Score<sub>j</sub> = ∑<sub>i=1</sub><sup>m</sup> w<sub>i</sub> × p<sub>ij</sub></div>
+<p>Here, <code>m</code> is the number of criteria, <code>w<sub>i</sub></code> is criterion <code>i</code>'s global weight, and <code>p<sub>ij</sub></code> is alternative <code>j</code>'s priority under that criterion. The highest score ranks first.</p>
+<p class="help"><strong>When using direct inputs:</strong> Manual criterion weights are entered as percentages summing to 100%. In relative-score evaluation, the tool normalises each criterion's alternative scores by their total: <code>p<sub>ij</sub> = s<sub>ij</sub> / ∑<sub>k</sub> s<sub>ik</sub></code>. Fixed 0–10 scoring instead uses <code>s<sub>ij</sub> / 10</code>. These are alternatives to pairwise evaluation, not additional eigenvector calculations; no pairwise CR is available for direct inputs.</p>
+</div></details>
 </div><div class="ahp-help-footer"><button type="button" id="gotItAhpHelp" class="primary">Got it</button></div></dialog><script type="module">
 import {manualWeights,calculateComparisons,synthesize,paretoFront,linearUtility} from './ahp-engine.mjs';
 import {validateProject} from './project-validation.mjs';
